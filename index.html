@@ -62,6 +62,24 @@
                     >
                         Demonstração (Simular)
                     </button>
+
+                    <div class="pt-4 border-t border-white/10">
+                        <p class="text-sm text-gray-400 mb-3">Modo Teste - Digite um UID da planilha:</p>
+                        <div class="flex gap-2">
+                            <input 
+                                type="text" 
+                                id="test-uid" 
+                                placeholder="Ex: 04:E3:2A:1B:5F:80:80"
+                                class="flex-1 px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-pink-500"
+                            />
+                            <button 
+                                onclick="testWithUID()"
+                                class="px-6 py-3 bg-blue-500/80 hover:bg-blue-500 rounded-xl font-semibold transition-all"
+                            >
+                                Testar
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -143,6 +161,44 @@
                 const counter = Math.floor(Math.random() * 100);
                 await verifyProduct(uid, signature, counter);
             }, 2000);
+        }
+
+        async function testWithUID() {
+            const input = document.getElementById('test-uid');
+            let uid = input.value.trim();
+
+            if (!uid) {
+                alert('Digite um UID para testar');
+                return;
+            }
+
+            // Aceitar UID com ou sem ":"
+            // Normalizar para formato com ":"
+            uid = uid.replace(/[^0-9A-Fa-f]/g, ''); // Remove tudo que não é hex
+            
+            if (uid.length < 14) {
+                alert('UID inválido. Digite no formato: 04:E3:2A:1B:5F:80:80');
+                return;
+            }
+
+            // Converter para formato com ":"
+            const formattedUID = uid.match(/.{1,2}/g).join(':').toUpperCase();
+
+            document.getElementById('scan-area').innerHTML = `
+                <div class="text-center py-8">
+                    <div class="w-24 h-24 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+                    <h3 class="text-xl font-bold mb-2">Testando UID...</h3>
+                    <p class="text-gray-400 text-sm">${formattedUID}</p>
+                </div>
+            `;
+
+            // Simular assinatura (modo demo)
+            const array = new Uint8Array(32);
+            crypto.getRandomValues(array);
+            const signature = Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
+            const counter = Math.floor(Math.random() * 100);
+
+            await verifyProduct(formattedUID, signature, counter);
         }
 
         async function verifyProduct(uid, signature, counter) {
