@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrueTouch™ - Verificação Make Beauty</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes gradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        .animate-gradient {
+            background-size: 200% 200%;
+            animation: gradient 3s ease infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen">
+    <div class="max-w-2xl mx-auto p-6">
+        <div class="text-center mb-8 mt-8">
+            <div class="inline-block p-3 bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded-2xl mb-4">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-pink-400">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+            </div>
+            <h1 class="text-4xl font-bold mb-2 bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent animate-gradient">
+                TrueTouch™
+            </h1>
+            <p class="text-gray-400">Sistema de Verificação de Autenticidade</p>
+        </div>
+
+        <div class="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10">
+            <div id="scan-area" class="text-center">
+                <svg width="64" height="64" class="mx-auto mb-4 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                </svg>
+                <h2 class="text-2xl font-bold mb-4">Verificar Produto</h2>
+                <p class="text-gray-400 mb-6">
+                    Aproxime seu smartphone da tag TrueTouch™ no produto Make Beauty
+                </p>
+                
+                <div class="space-y-3">
+                    <button 
+                        onclick="scanNFC()"
+                        class="w-full py-4 px-6 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl font-semibold hover:shadow-2xl hover:shadow-pink-500/50 transition-all"
+                    >
+                        Escanear NFC
+                    </button>
+                    
+                    <button 
+                        onclick="simulateScan()"
+                        class="w-full py-4 px-6 bg-white/10 border border-white/20 rounded-xl font-semibold hover:bg-white/20 transition-all"
+                    >
+                        Demonstração (Simular)
+                    </button>
+                </div>
+            </div>
+
+            <div id="result-area" class="hidden"></div>
+        </div>
+
+        <div class="text-center text-sm text-gray-500 mt-8">
+            <p>Protegido por TrueTouch™</p>
+            <p class="mt-1">Tecnologia anti-falsificação Make Beauty</p>
+        </div>
+    </div>
+
+    <script>
+        // IMPORTANTE: Sua URL do Render
+        const API_URL = 'https://makebeauty-nfc-backend.onrender.com';
+
+        async function scanNFC() {
+            if (!('NDEFReader' in window)) {
+                alert('Seu navegador não suporta NFC. Use Chrome no Android para escanear tags reais.');
+                return;
+            }
+
+            try {
+                const ndef = new NDEFReader();
+                await ndef.scan();
+                
+                document.getElementById('scan-area').innerHTML = `
+                    <div class="text-center py-8">
+                        <div class="w-24 h-24 border-4 border-pink-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+                        <h3 class="text-xl font-bold mb-2">Escaneando...</h3>
+                        <p class="text-gray-400">Aproxime a tag NFC do seu dispositivo</p>
+                    </div>
+                `;
+
+                ndef.addEventListener('reading', async ({ message, serialNumber }) => {
+                    const uid = serialNumber;
+                    
+                    let signature = '';
+                    let counter = 0;
+                    
+                    for (const record of message.records) {
+                        const decoder = new TextDecoder();
+                        const data = decoder.decode(record.data);
+                        const parts = data.split(':');
+                        if (parts.length === 2) {
+                            signature = parts[0];
+                            counter = parseInt(parts[1]);
+                        }
+                    }
+
+                    if (!signature) {
+                        const array = new Uint8Array(32);
+                        crypto.getRandomValues(array);
+                        signature = Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
+                        counter = Math.floor(Math.random() * 100);
+                    }
+
+                    await verifyProduct(uid, signature, counter);
+                });
+
+            } catch (error) {
+                alert('Erro ao iniciar scanner: ' + error.message);
+            }
+        }
+
+        async function simulateScan() {
+            document.getElementById('scan-area').innerHTML = `
+                <div class="text-center py-8">
+                    <div class="w-24 h-24 border-4 border-pink-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+                    <h3 class="text-xl font-bold mb-2">Simulando scan...</h3>
+                </div>
+            `;
+
+            setTimeout(async () => {
+                const uid = '04:AA:BB:CC:DD:EE:FF';
+                const array = new Uint8Array(32);
+                crypto.getRandomValues(array);
+                const signature = Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
+                const counter = Math.floor(Math.random() * 100);
+                await verifyProduct(uid, signature, counter);
+            }, 2000);
+        }
+
+        async function verifyProduct(uid, signature, counter) {
+            try {
+                const response = await fetch(`${API_URL}/api/verify-product`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ uid, signature, counter, location: 'Web' })
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.authentic) {
+                    showSuccess(data.product);
+                } else {
+                    showError(data.error);
+                }
+
+            } catch (error) {
+                showError('Erro ao conectar com servidor: ' + error.message);
+            }
+        }
+
+        function showSuccess(product) {
+            document.getElementById('scan-area').innerHTML = '';
+            document.getElementById('result-area').className = 'space-y-6';
+            document.getElementById('result-area').innerHTML = `
+                <div class="text-center pb-6 border-b border-white/10">
+                    <div class="inline-block p-4 bg-green-500/20 rounded-full mb-4">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-green-400">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-green-400 mb-2">Produto Autêntico</h3>
+                    <p class="text-gray-400">Este produto Make Beauty é 100% original</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex items-start gap-3">
+                        <svg width="20" height="20" class="text-purple-400 mt-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        </svg>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-400">Produto</p>
+                            <p class="font-semibold">${product.name}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <svg width="20" height="20" class="text-purple-400 mt-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-400">ID do Produto</p>
+                            <p class="font-mono text-sm">${product.productId}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <svg width="20" height="20" class="text-purple-400 mt-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                        </svg>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-400">Fabricação</p>
+                            <p class="font-semibold">${new Date(product.manufacturingDate).toLocaleDateString('pt-BR')}</p>
+                            <p class="text-xs text-gray-500">Lote: ${product.batchNumber}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <svg width="20" height="20" class="text-purple-400 mt-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-400">Validade</p>
+                            <p class="font-semibold">${new Date(product.expiryDate).toLocaleDateString('pt-BR')}</p>
+                            <p class="text-xs ${product.status === 'Válido' ? 'text-green-400' : 'text-red-400'}">
+                                Status: ${product.status}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <svg width="20" height="20" class="text-purple-400 mt-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-400">Local de Fabricação</p>
+                            <p class="font-semibold">${product.manufacturingLocation}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 pt-6 border-t border-white/10">
+                    <div class="bg-purple-500/10 rounded-xl p-4 text-center">
+                        <p class="text-3xl font-bold text-purple-400">${product.scanCount}</p>
+                        <p class="text-sm text-gray-400">Verificações</p>
+                    </div>
+                    <div class="bg-pink-500/10 rounded-xl p-4 text-center">
+                        <p class="text-3xl font-bold text-pink-400">${product.ageInDays}</p>
+                        <p class="text-sm text-gray-400">Dias desde fabricação</p>
+                    </div>
+                </div>
+
+                <button 
+                    onclick="location.reload()"
+                    class="w-full py-3 bg-white/10 rounded-xl hover:bg-white/20 transition-all"
+                >
+                    Verificar Outro Produto
+                </button>
+            `;
+        }
+
+        function showError(error) {
+            document.getElementById('scan-area').innerHTML = '';
+            document.getElementById('result-area').className = 'bg-red-500/10 border-2 border-red-500/50 rounded-xl p-6';
+            document.getElementById('result-area').innerHTML = `
+                <div class="text-center mb-6">
+                    <div class="inline-block p-4 bg-red-500/20 rounded-full mb-4">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-red-400">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-red-400 mb-2">Produto Não Autenticado</h3>
+                    <p class="text-gray-300">${error}</p>
+                </div>
+
+                <div class="bg-red-500/20 rounded-xl p-4 mb-6">
+                    <h4 class="font-bold mb-2 text-red-300">Atenção</h4>
+                    <ul class="text-sm text-gray-300 space-y-1">
+                        <li>• Este produto não foi verificado como autêntico</li>
+                        <li>• Pode ser falsificado ou não autorizado</li>
+                        <li>• Entre em contato com Make Beauty</li>
+                    </ul>
+                </div>
+
+                <button 
+                    onclick="location.reload()"
+                    class="w-full py-3 bg-red-500/20 rounded-xl hover:bg-red-500/30 transition-all"
+                >
+                    Tentar Novamente
+                </button>
+            `;
+        }
+    </script>
+</body>
+</html>
