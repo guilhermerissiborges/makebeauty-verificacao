@@ -96,6 +96,53 @@
         // IMPORTANTE: Sua URL do Render
         const API_URL = 'https://makebeauty-nfc-backend.onrender.com';
 
+        // ============================================
+        // AUTO-DETECT UID NA URL E VERIFICAR
+        // ============================================
+        window.addEventListener('DOMContentLoaded', function() {
+            // Pegar parâmetros da URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const uidFromURL = urlParams.get('uid');
+            
+            if (uidFromURL) {
+                console.log('UID detectado na URL:', uidFromURL);
+                // Verificar automaticamente
+                autoVerifyFromURL(uidFromURL);
+            }
+        });
+
+        async function autoVerifyFromURL(uid) {
+            // Normalizar UID
+            let normalizedUID = uid.replace(/[^0-9A-Fa-f]/g, '');
+            
+            if (normalizedUID.length < 14) {
+                showError('UID inválido na URL. Formato esperado: 04:E3:2A:1B:5F:80:80');
+                return;
+            }
+
+            // Formatar com ":"
+            const formattedUID = normalizedUID.match(/.{1,2}/g).join(':').toUpperCase();
+
+            // Mostrar estado de carregamento
+            document.getElementById('scan-area').innerHTML = `
+                <div class="text-center py-8">
+                    <div class="w-24 h-24 border-4 border-pink-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+                    <h3 class="text-xl font-bold mb-2">Verificando Produto...</h3>
+                    <p class="text-gray-400 text-sm mb-4">UID: ${formattedUID}</p>
+                    <p class="text-xs text-gray-500">Detectado automaticamente via URL</p>
+                </div>
+            `;
+
+            // Simular assinatura
+            const array = new Uint8Array(32);
+            crypto.getRandomValues(array);
+            const signature = Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
+            const counter = Math.floor(Math.random() * 100) + 1;
+
+            // Verificar produto
+            await verifyProduct(formattedUID, signature, counter);
+        }
+
         async function scanNFC() {
             if (!('NDEFReader' in window)) {
                 alert('Seu navegador não suporta NFC. Use Chrome no Android para escanear tags reais.');
@@ -173,15 +220,13 @@
             }
 
             // Aceitar UID com ou sem ":"
-            // Normalizar para formato com ":"
-            uid = uid.replace(/[^0-9A-Fa-f]/g, ''); // Remove tudo que não é hex
+            uid = uid.replace(/[^0-9A-Fa-f]/g, '');
             
             if (uid.length < 14) {
                 alert('UID inválido. Digite no formato: 04:E3:2A:1B:5F:80:80');
                 return;
             }
 
-            // Converter para formato com ":"
             const formattedUID = uid.match(/.{1,2}/g).join(':').toUpperCase();
 
             document.getElementById('scan-area').innerHTML = `
@@ -192,7 +237,6 @@
                 </div>
             `;
 
-            // Simular assinatura (modo demo)
             const array = new Uint8Array(32);
             crypto.getRandomValues(array);
             const signature = Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
@@ -308,12 +352,20 @@
                     </div>
                 </div>
 
-                <button 
-                    onclick="location.reload()"
-                    class="w-full py-3 bg-white/10 rounded-xl hover:bg-white/20 transition-all"
-                >
-                    Verificar Outro Produto
-                </button>
+                <div class="flex gap-2">
+                    <button 
+                        onclick="location.reload()"
+                        class="flex-1 py-3 bg-white/10 rounded-xl hover:bg-white/20 transition-all"
+                    >
+                        Verificar Outro Produto
+                    </button>
+                    <button 
+                        onclick="shareResult()"
+                        class="flex-1 py-3 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl hover:shadow-xl transition-all"
+                    >
+                        Compartilhar
+                    </button>
+                </div>
             `;
         }
 
@@ -349,6 +401,30 @@
                     Tentar Novamente
                 </button>
             `;
+        }
+
+        function shareResult() {
+            const currentURL = window.location.href.split('?')[0];
+            const urlParams = new URLSearchParams(window.location.search);
+            const uid = urlParams.get('uid');
+            
+            if (uid) {
+                const shareURL = `${currentURL}?uid=${encodeURIComponent(uid)}`;
+                
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'Produto Make Beauty Verificado',
+                        text: 'Este produto Make Beauty é autêntico! Verificado com TrueTouch™',
+                        url: shareURL
+                    }).catch(err => console.log('Erro ao compartilhar:', err));
+                } else {
+                    navigator.clipboard.writeText(shareURL).then(() => {
+                        alert('Link copiado para a área de transferência!');
+                    });
+                }
+            } else {
+                alert('Não foi possível gerar link de compartilhamento');
+            }
         }
     </script>
 </body>
