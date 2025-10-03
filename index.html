@@ -21,6 +21,120 @@
         .animate-pulse {
             animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
+        
+        /* Animação NFC */
+        @keyframes phoneMove {
+            0%, 100% { transform: translateY(0) translateX(-50%); }
+            50% { transform: translateY(-30px) translateX(-50%); }
+        }
+        @keyframes nfcWaves {
+            0% { 
+                transform: scale(0.8);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.3;
+            }
+            100% { 
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .phone-animation {
+            position: relative;
+            width: 120px;
+            height: 240px;
+            margin: 0 auto 30px;
+        }
+        
+        .nfc-tag {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .nfc-waves {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .nfc-wave {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 3px solid #ec4899;
+            border-radius: 50%;
+            animation: nfcWaves 2s ease-out infinite;
+        }
+        
+        .nfc-wave:nth-child(2) {
+            animation-delay: 0.4s;
+        }
+        
+        .nfc-wave:nth-child(3) {
+            animation-delay: 0.8s;
+        }
+        
+        .phone {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 80px;
+            height: 160px;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border-radius: 16px;
+            border: 3px solid #334155;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: phoneMove 3s ease-in-out infinite;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px;
+        }
+        
+        .phone-notch {
+            width: 40px;
+            height: 6px;
+            background: #475569;
+            border-radius: 3px;
+            margin-bottom: 6px;
+        }
+        
+        .phone-screen {
+            flex: 1;
+            width: 100%;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nfc-icon {
+            width: 30px;
+            height: 30px;
+            color: white;
+            z-index: 1;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white min-h-screen">
@@ -39,45 +153,89 @@
 
         <div class="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10">
             <div id="scan-area" class="text-center">
-                <svg width="64" height="64" class="mx-auto mb-4 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
-                </svg>
+                <!-- Animação NFC -->
+                <div class="phone-animation">
+                    <div class="nfc-tag">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" class="nfc-icon">
+                            <path d="M6 9h12M6 15h12M6 12h12"></path>
+                        </svg>
+                        <div class="nfc-waves">
+                            <div class="nfc-wave"></div>
+                            <div class="nfc-wave"></div>
+                            <div class="nfc-wave"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="phone">
+                        <div class="phone-notch"></div>
+                        <div class="phone-screen">
+                            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="nfc-icon">
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
                 <h2 class="text-2xl font-bold mb-4">Verificar Produto</h2>
-                <p class="text-gray-400 mb-6">
+                <p class="text-gray-400 mb-8">
                     Aproxime seu smartphone da tag TrueTouch™ no produto Make Beauty
                 </p>
                 
                 <div class="space-y-3">
                     <button 
                         onclick="scanNFC()"
-                        class="w-full py-4 px-6 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl font-semibold hover:shadow-2xl hover:shadow-pink-500/50 transition-all"
+                        class="w-full py-4 px-6 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl font-semibold hover:shadow-2xl hover:shadow-pink-500/50 transition-all transform hover:scale-105"
                     >
-                        Escanear NFC
+                        <div class="flex items-center justify-center gap-2">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                                <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                            </svg>
+                            Escanear com NFC
+                        </div>
                     </button>
                     
                     <button 
                         onclick="simulateScan()"
-                        class="w-full py-4 px-6 bg-white/10 border border-white/20 rounded-xl font-semibold hover:bg-white/20 transition-all"
+                        class="w-full py-4 px-6 bg-white/10 border border-white/20 rounded-xl font-semibold hover:bg-white/20 transition-all transform hover:scale-105"
                     >
-                        Demonstração (Simular)
+                        <div class="flex items-center justify-center gap-2">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                            </svg>
+                            Demonstração (Produto Exemplo)
+                        </div>
                     </button>
+                </div>
 
-                    <div class="pt-4 border-t border-white/10">
-                        <p class="text-sm text-gray-400 mb-3">Modo Teste - Digite um UID da planilha:</p>
-                        <div class="flex gap-2">
-                            <input 
-                                type="text" 
-                                id="test-uid" 
-                                placeholder="Ex: 04:E3:2A:1B:5F:80:80"
-                                class="flex-1 px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-pink-500"
-                            />
-                            <button 
-                                onclick="testWithUID()"
-                                class="px-6 py-3 bg-blue-500/80 hover:bg-blue-500 rounded-xl font-semibold transition-all"
-                            >
-                                Testar
-                            </button>
+                <!-- Instruções -->
+                <div class="mt-8 pt-6 border-t border-white/10">
+                    <div class="grid grid-cols-3 gap-4 text-xs text-gray-400">
+                        <div class="flex flex-col items-center">
+                            <div class="w-12 h-12 rounded-full bg-pink-500/20 flex items-center justify-center mb-2">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-pink-400">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <path d="m21 21-4.35-4.35"></path>
+                                </svg>
+                            </div>
+                            <span>Localize a tag TrueTouch™</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center mb-2">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-purple-400">
+                                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                                </svg>
+                            </div>
+                            <span>Aproxime o celular</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center mb-2">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-blue-400">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
+                            </div>
+                            <span>Confirmação instantânea</span>
                         </div>
                     </div>
                 </div>
@@ -137,7 +295,7 @@
             const array = new Uint8Array(32);
             crypto.getRandomValues(array);
             const signature = Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
-            const counter = Math.floor(Math.random() * 100) + 1;
+            const counter = 1; // Fixo para produtos da planilha
 
             // Verificar produto
             await verifyProduct(formattedUID, signature, counter);
@@ -181,7 +339,7 @@
                         const array = new Uint8Array(32);
                         crypto.getRandomValues(array);
                         signature = Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
-                        counter = Math.floor(Math.random() * 100);
+                        counter = 1; // Fixo para produtos da planilha
                     }
 
                     await verifyProduct(uid, signature, counter);
@@ -196,7 +354,8 @@
             document.getElementById('scan-area').innerHTML = `
                 <div class="text-center py-8">
                     <div class="w-24 h-24 border-4 border-pink-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-                    <h3 class="text-xl font-bold mb-2">Simulando scan...</h3>
+                    <h3 class="text-xl font-bold mb-2">Simulando leitura NFC...</h3>
+                    <p class="text-gray-400">Processando produto de demonstração</p>
                 </div>
             `;
 
@@ -205,44 +364,9 @@
                 const array = new Uint8Array(32);
                 crypto.getRandomValues(array);
                 const signature = Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
-                const counter = Math.floor(Math.random() * 100);
+                const counter = 1; // Fixo para produtos da planilha
                 await verifyProduct(uid, signature, counter);
             }, 2000);
-        }
-
-        async function testWithUID() {
-            const input = document.getElementById('test-uid');
-            let uid = input.value.trim();
-
-            if (!uid) {
-                alert('Digite um UID para testar');
-                return;
-            }
-
-            // Aceitar UID com ou sem ":"
-            uid = uid.replace(/[^0-9A-Fa-f]/g, '');
-            
-            if (uid.length < 14) {
-                alert('UID inválido. Digite no formato: 04:E3:2A:1B:5F:80:80');
-                return;
-            }
-
-            const formattedUID = uid.match(/.{1,2}/g).join(':').toUpperCase();
-
-            document.getElementById('scan-area').innerHTML = `
-                <div class="text-center py-8">
-                    <div class="w-24 h-24 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-                    <h3 class="text-xl font-bold mb-2">Testando UID...</h3>
-                    <p class="text-gray-400 text-sm">${formattedUID}</p>
-                </div>
-            `;
-
-            const array = new Uint8Array(32);
-            crypto.getRandomValues(array);
-            const signature = Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
-            const counter = Math.floor(Math.random() * 100);
-
-            await verifyProduct(formattedUID, signature, counter);
         }
 
         async function verifyProduct(uid, signature, counter) {
