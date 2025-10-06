@@ -14,12 +14,13 @@
             background-size: 200% 200%;
             animation: gradient 3s ease infinite;
         }
-        @keyframes nfc-scan {
-            0%, 100% { transform: translateY(0) rotate(-15deg); }
-            50% { transform: translateY(-10px) rotate(-15deg); }
+        @keyframes phone-approach {
+            0% { transform: translateY(-60px) translateX(20px) rotate(-8deg); }
+            50% { transform: translateY(10px) translateX(0) rotate(-3deg); }
+            100% { transform: translateY(-60px) translateX(20px) rotate(-8deg); }
         }
-        .animate-nfc-scan {
-            animation: nfc-scan 2s ease-in-out infinite;
+        .animate-phone-approach {
+            animation: phone-approach 3s ease-in-out infinite;
         }
         @keyframes pulse-ring {
             0% {
@@ -52,67 +53,105 @@
 
         <div class="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10">
             <div id="scan-area" class="text-center">
-                <!-- Ilustração do celular encostando no chip -->
-                <div class="relative w-64 h-64 mx-auto mb-6">
-                    <!-- Chip NFC (fixo no centro-baixo) -->
+                <!-- Ilustração da mão segurando celular aproximando da tag -->
+                <div class="relative w-64 h-80 mx-auto mb-6">
+                    <!-- Tag NFC (fixa no centro-baixo) -->
                     <div class="absolute bottom-8 left-1/2 -translate-x-1/2">
                         <div class="relative">
                             <!-- Ondas de sinal -->
                             <div class="absolute inset-0 flex items-center justify-center">
-                                <div class="w-20 h-20 rounded-full bg-purple-500/30 pulse-ring"></div>
-                                <div class="absolute w-20 h-20 rounded-full bg-purple-500/30 pulse-ring" style="animation-delay: 0.5s;"></div>
-                                <div class="absolute w-20 h-20 rounded-full bg-purple-500/30 pulse-ring" style="animation-delay: 1s;"></div>
+                                <div class="w-24 h-24 rounded-full bg-purple-500/30 pulse-ring"></div>
+                                <div class="absolute w-24 h-24 rounded-full bg-purple-500/30 pulse-ring" style="animation-delay: 0.5s;"></div>
+                                <div class="absolute w-24 h-24 rounded-full bg-purple-500/30 pulse-ring" style="animation-delay: 1s;"></div>
                             </div>
-                            <!-- Chip -->
-                            <svg width="60" height="60" viewBox="0 0 60 60" class="relative z-10">
-                                <rect x="10" y="10" width="40" height="40" rx="4" fill="#9333ea" opacity="0.3"/>
-                                <circle cx="30" cy="30" r="12" fill="#a855f7"/>
-                                <circle cx="30" cy="30" r="8" fill="#c084fc" opacity="0.5"/>
-                                <circle cx="30" cy="30" r="4" fill="#e9d5ff"/>
+                            <!-- Produto com Tag -->
+                            <svg width="80" height="80" viewBox="0 0 80 80" class="relative z-10">
+                                <!-- Frasco/Produto -->
+                                <rect x="15" y="20" width="50" height="45" rx="8" fill="#e9d5ff" opacity="0.3"/>
+                                <rect x="20" y="25" width="40" height="35" rx="6" fill="#c084fc" opacity="0.4"/>
+                                
+                                <!-- Tag TrueTouch -->
+                                <g transform="translate(25, 30)">
+                                    <rect x="0" y="0" width="30" height="25" rx="3" fill="#9333ea" opacity="0.5"/>
+                                    <circle cx="15" cy="12" r="8" fill="#a855f7"/>
+                                    <circle cx="15" cy="12" r="5" fill="#c084fc" opacity="0.7"/>
+                                    <circle cx="15" cy="12" r="2" fill="#e9d5ff"/>
+                                    <text x="15" y="23" text-anchor="middle" fill="#fff" font-size="4" font-weight="bold">NFC</text>
+                                </g>
                             </svg>
                         </div>
                     </div>
                     
-                    <!-- Smartphone (animado, parte de trás para baixo) -->
-                    <div class="absolute top-0 left-1/2 -translate-x-1/2 animate-nfc-scan">
-                        <svg width="100" height="180" viewBox="0 0 100 180">
-                            <!-- Corpo do celular -->
-                            <g transform="rotate(-15 50 90)">
-                                <!-- Traseira do celular -->
-                                <rect x="10" y="10" width="80" height="160" rx="12" fill="#1f2937" stroke="#374151" stroke-width="2"/>
+                    <!-- Mão + Smartphone (animado aproximando) -->
+                    <div class="absolute top-0 left-1/2 -translate-x-1/2 animate-phone-approach">
+                        <svg width="140" height="200" viewBox="0 0 140 200">
+                            <!-- Mão -->
+                            <g transform="translate(10, 80)">
+                                <!-- Pulso -->
+                                <ellipse cx="35" cy="90" rx="20" ry="12" fill="#d4a574" opacity="0.9"/>
                                 
-                                <!-- Câmeras (parte de trás) -->
-                                <g transform="translate(15, 20)">
-                                    <rect x="0" y="0" width="35" height="35" rx="8" fill="#111827"/>
-                                    <circle cx="12" cy="12" r="8" fill="#4b5563"/>
-                                    <circle cx="12" cy="12" r="5" fill="#6b7280"/>
-                                    <circle cx="12" cy="28" r="4" fill="#4b5563"/>
-                                    <rect x="24" y="24" width="8" height="8" rx="2" fill="#6b7280"/>
+                                <!-- Palma -->
+                                <path d="M 20 70 Q 15 80, 20 90 L 50 90 Q 55 80, 50 70 Z" fill="#d4a574"/>
+                                
+                                <!-- Polegar -->
+                                <ellipse cx="15" cy="60" rx="8" ry="15" fill="#d4a574" transform="rotate(-20 15 60)"/>
+                                <ellipse cx="12" cy="50" rx="6" ry="10" fill="#c9995e" transform="rotate(-20 12 50)"/>
+                                
+                                <!-- Dedos segurando o lado -->
+                                <ellipse cx="55" cy="55" rx="6" ry="18" fill="#d4a574"/>
+                                <ellipse cx="58" cy="40" rx="5" ry="12" fill="#c9995e"/>
+                            </g>
+                            
+                            <!-- Smartphone -->
+                            <g transform="translate(25, 20)">
+                                <!-- Corpo do celular -->
+                                <rect x="0" y="0" width="90" height="160" rx="12" fill="#1f2937" stroke="#374151" stroke-width="2"/>
+                                
+                                <!-- Tela -->
+                                <rect x="5" y="8" width="80" height="144" rx="8" fill="#111827"/>
+                                
+                                <!-- Conteúdo da tela - Logo TrueTouch -->
+                                <g transform="translate(45, 50)">
+                                    <!-- Escudo -->
+                                    <path d="M 0 -25 L 15 -30 L 15 -10 Q 15 10, 0 20 Q -15 10, -15 -10 L -15 -30 Z" 
+                                          fill="url(#grad1)" stroke="#a855f7" stroke-width="1.5"/>
+                                    
+                                    <!-- Símbolo NFC -->
+                                    <circle cx="0" cy="-5" r="8" fill="none" stroke="#e9d5ff" stroke-width="1.5"/>
+                                    <path d="M 0 -10 Q 6 -8, 6 -5 Q 6 -2, 0 0" 
+                                          stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/>
+                                    <circle cx="0" cy="-5" r="2" fill="#fff"/>
                                 </g>
                                 
-                                <!-- Logo/Marca -->
-                                <text x="50" y="100" text-anchor="middle" fill="#6b7280" font-size="12" font-family="Arial">
-                                    Make Beauty
+                                <!-- Texto TrueTouch -->
+                                <text x="45" y="110" text-anchor="middle" fill="#a855f7" font-size="11" font-weight="bold" font-family="Arial">
+                                    TrueTouch™
+                                </text>
+                                <text x="45" y="125" text-anchor="middle" fill="#6b7280" font-size="7" font-family="Arial">
+                                    Aproxime da tag
                                 </text>
                                 
-                                <!-- Indicador NFC -->
-                                <g transform="translate(35, 130)">
-                                    <circle cx="15" cy="15" r="14" fill="#9333ea" opacity="0.2"/>
-                                    <path d="M 15 8 Q 20 10, 20 15 Q 20 20, 15 22" stroke="#a855f7" stroke-width="2" fill="none"/>
-                                    <path d="M 15 11 Q 17 12, 17 15 Q 17 18, 15 19" stroke="#c084fc" stroke-width="2" fill="none"/>
-                                    <circle cx="15" cy="15" r="2" fill="#e9d5ff"/>
-                                </g>
+                                <!-- Botão home/barra -->
+                                <rect x="35" y="150" width="20" height="3" rx="1.5" fill="#374151"/>
                                 
-                                <!-- Brilho/Reflexo -->
-                                <rect x="20" y="20" width="30" height="60" rx="4" fill="white" opacity="0.05"/>
+                                <!-- Notch/câmera frontal -->
+                                <ellipse cx="45" cy="4" rx="8" ry="2" fill="#000"/>
                             </g>
+                            
+                            <!-- Gradiente -->
+                            <defs>
+                                <linearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#ec4899;stop-opacity:0.8" />
+                                    <stop offset="100%" style="stop-color:#9333ea;stop-opacity:0.8" />
+                                </linearGradient>
+                            </defs>
                         </svg>
                     </div>
                 </div>
 
                 <h2 class="text-2xl font-bold mb-4">Verificar Produto</h2>
                 <p class="text-gray-400 mb-6">
-                    Aproxime a <span class="text-pink-400 font-semibold">parte de trás</span> do seu smartphone da tag TrueTouch™
+                    Aproxime seu smartphone da tag TrueTouch™ no produto Make Beauty
                 </p>
                 
                 <div class="space-y-3">
@@ -154,7 +193,7 @@
         </div>
 
         <div class="text-center text-sm text-gray-500 mt-8">
-            <p>💡 <span class="text-gray-400">Dica:</span> O sensor NFC geralmente fica na parte superior traseira do celular</p>
+            <p>💡 <span class="text-gray-400">Dica:</span> Encoste a parte traseira superior do celular bem próxima à tag</p>
             <p class="mt-2">Protegido por TrueTouch™</p>
             <p class="mt-1">Tecnologia anti-falsificação Make Beauty</p>
         </div>
@@ -177,7 +216,7 @@
                     <div class="text-center py-8">
                         <div class="w-24 h-24 border-4 border-pink-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
                         <h3 class="text-xl font-bold mb-2">Escaneando...</h3>
-                        <p class="text-gray-400">Aproxime a parte traseira do celular na tag NFC</p>
+                        <p class="text-gray-400">Mantenha o celular próximo à tag NFC</p>
                     </div>
                 `;
 
